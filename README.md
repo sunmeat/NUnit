@@ -1,11 +1,10 @@
+# Проєкт: Entity Framework Core з NUnit для тестування
 
-# Проект: Entity Framework Core с NUnit для тестирования
+Цей проєкт демонструє використання Entity Framework Core з базою даних у пам’яті для тестування, а також використання NUnit для написання модульних тестів.
 
-Этот проект демонстрирует использование Entity Framework Core с базой данных в памяти для тестирования, а также использование NUnit для написания модульных тестов.
+## Встановлення бібліотек
 
-## Установка библиотек
-
-Для установки необходимых библиотек используйте следующие команды в терминале:
+Для встановлення необхідних бібліотек використовуйте такі команди в терміналі:
 
 ```
 dotnet add package NUnit
@@ -14,17 +13,17 @@ dotnet add package Microsoft.EntityFrameworkCore.InMemory
 dotnet add package Microsoft.NET.Test.Sdk
 ```
 
-## Конфигурация .csproj
+## Конфігурація .csproj
 
-В файле `.csproj` (кликните на имя проекта), добавьте следующую строку внутри элемента `<PropertyGroup>`:
+У файлі `.csproj` (клацніть на назву проєкту) додайте такий рядок всередині елемента `<PropertyGroup>`:
 
 ```xml
 <StartupObject>Program</StartupObject>
 ```
 
-## Описание кода
+## Опис коду
 
-### Класс Person
+### Клас Person
 
 ```csharp
 public class Person
@@ -42,7 +41,7 @@ public class Person
 }
 ```
 
-### Класс Hobby
+### Клас Hobby
 
 ```csharp
 public class Hobby
@@ -92,10 +91,10 @@ public class PersonRepository
 
         foreach (var person in people)
         {
-            Console.WriteLine($"Человек: {person.Name}");
+            Console.WriteLine($"Персона: {person.Name}");
             foreach (var hobby in person.Hobbies)
             {
-                Console.WriteLine($"  Увлечение: {hobby.Name}");
+                Console.WriteLine($"  Захоплення: {hobby.Name}");
             }
         }
     }
@@ -116,8 +115,8 @@ internal class Program
         using var context = new ApplicationDbContext(options);
         var repo = new PersonRepository(context);
 
-        var person1 = new Person { Name = "Александр", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Чтение" } } };
-        var person2 = new Person { Name = "Артём", Hobbies = new List<Hobby> { new Hobby { Name = "Рисование" }, new Hobby { Name = "Путешествия" } } };
+        var person1 = new Person { Name = "Олександр", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Читання" } } };
+        var person2 = new Person { Name = "Артем", Hobbies = new List<Hobby> { new Hobby { Name = "Малювання" }, new Hobby { Name = "Подорожі" } } };
         context.People?.AddRange(person1, person2);
         context.SaveChanges();
 
@@ -126,15 +125,15 @@ internal class Program
 }
 ```
 
-### Запуск тестов
+### Запуск тестів
 
-Чтобы запустить тесты, используйте следующую команду:
+Щоб запустити тести, використовуйте таку команду:
 
 ```
 dotnet test
 ```
 
-### Класс тестов: PersonRepositoryTests
+### Клас тестів: PersonRepositoryTests
 
 ```csharp
 [TestFixture]
@@ -155,27 +154,27 @@ public class PersonRepositoryTests
     [Test]
     public void GetAllPeopleWithHobbies_ShouldReturnPeopleWithHobbies()
     {
-        var person1 = new Person { Name = "АлександрТест", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Чтение" } } };
-        var person2 = new Person { Name = "АртёмТест", Hobbies = new List<Hobby> { new Hobby { Name = "Рисование" }, new Hobby { Name = "Путешествия" } } };
+        var person1 = new Person { Name = "ОлександрТест", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Читання" } } };
+        var person2 = new Person { Name = "АртемТест", Hobbies = new List<Hobby> { new Hobby { Name = "Малювання" }, new Hobby { Name = "Подорожі" } } };
         _context?.People?.AddRange(person1, person2);
         _context?.SaveChanges();
 
         var result = _context?.People?.Include(p => p.Hobbies).ToList();
 
         Assert.That(result?.Count, Is.EqualTo(2));
-        Assert.That(result?[0].Name, Is.EqualTo("АлександрТест"));
+        Assert.That(result?[0].Name, Is.EqualTo("ОлександрТест"));
         Assert.That(result?[0].Hobbies.Count, Is.EqualTo(2));
         Assert.That(result?[0].Hobbies.ElementAt(0).Name, Is.EqualTo("Футбол"));
     }
 }
 ```
 
-## Примечания
+## Примітки
 
-- Этот проект использует базу данных в памяти для тестирования, которая симулирует операции с базой данных без необходимости в реальной базе данных.
-- Убедитесь, что все необходимые пакеты установлены с помощью команд `dotnet add package`.
-- Для запуска тестов используйте команду `dotnet test`.
+- Цей проєкт використовує базу даних у пам’яті для тестування, яка імітує роботу з базою даних без необхідності використання реальної БД.
+- Переконайтеся, що всі необхідні пакети встановлено за допомогою команд `dotnet add package`.
+- Для запуску тестів використовуйте команду `dotnet test`.
 
-## Лицензия
+## Ліцензія
 
-Этот проект лицензирован по лицензии MIT — подробности см. в файле [LICENSE](LICENSE).
+Цей проєкт ліцензовано за ліцензією MIT — детальніше див. файл [LICENSE.md](LICENSE).
