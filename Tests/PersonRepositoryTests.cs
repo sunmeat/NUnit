@@ -1,100 +1,99 @@
-﻿using NUnit.Framework;
+using NUnit.Framework;
 using Microsoft.EntityFrameworkCore;
 
-[TestFixture] // так в NUnit помечаются тестовые классы
+[TestFixture] // так у NUnit позначають тестові класи
 public class PersonRepositoryTests
 {
     private ApplicationDbContext? _context;
-    
-    [SetUp] // этот метод выполняется перед каждым тестом
+
+    [SetUp] // цей метод виконується перед кожним тестом
     public void SetUp()
     {
-        // используем InMemory базу данных для тестирования
+        // використовуємо InMemory базу даних для тестування
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase("TestDatabase")
             .Options;
-
         _context = new ApplicationDbContext(options);
     }
 
-    // тест для получения всех людей с их увлечениями
-    [Test] // таким аттрибутом помечаются все обычные тестовые методы
+    // тест для отримання всіх людей разом з їхніми захопленнями
+    [Test] // таким атрибутом позначають усі звичайні тестові методи
     public void GetAllPeopleWithHobbies_ShouldReturnPeopleWithHobbies()
     {
-        // подготоваливаем данные
-        var person1 = new Person { Name = "АлександрТест", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Чтение" } } };
-        var person2 = new Person { Name = "АртёмТест", Hobbies = new List<Hobby> { new Hobby { Name = "Рисование" }, new Hobby { Name = "Путешествия" } } };
+        // готуємо дані
+        var person1 = new Person { Name = "ОлександрТест", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Читання" } } };
+        var person2 = new Person { Name = "АртемТест", Hobbies = new List<Hobby> { new Hobby { Name = "Малювання" }, new Hobby { Name = "Подорожі" } } };
         _context?.People?.AddRange(person1, person2);
         _context?.SaveChanges();
 
-        // извлекаем
+        // отримуємо
         var result = _context?.People?.Include(p => p.Hobbies).ToList();
 
-        // проверки
+        // перевірки
         Assert.That(result?.Count, Is.EqualTo(2));
-        Assert.That(result?[0].Name, Is.EqualTo("АлександрТест"));
+        Assert.That(result?[0].Name, Is.EqualTo("ОлександрТест"));
         Assert.That(result?[0].Hobbies.Count, Is.EqualTo(2));
         Assert.That(result?[0].Hobbies.ElementAt(0).Name, Is.EqualTo("Футбол"));
     }
 
-    // тест для добавления нового человека с увлечениями
+    // тест для додавання нової людини з захопленнями
     [Test]
     public void AddPerson_ShouldAddPersonWithHobbies()
     {
-        // подготовка данных
-        var person = new Person { Name = "Василий", Hobbies = new List<Hobby> { new Hobby { Name = "Чтение" }, new Hobby { Name = "Плавание" } } };
+        // підготовка даних
+        var person = new Person { Name = "Василь", Hobbies = new List<Hobby> { new Hobby { Name = "Читання" }, new Hobby { Name = "Плавання" } } };
 
-        // сохраняем в БД
+        // зберігаємо в БД
         _context?.People?.Add(person);
         _context?.SaveChanges();
 
-        // проверки
-        var addedPerson = _context?.People?.FirstOrDefault(p => p.Name == "Василий");
+        // перевірки
+        var addedPerson = _context?.People?.FirstOrDefault(p => p.Name == "Василь");
         Assert.That(addedPerson, Is.Not.Null);
-        Assert.That(addedPerson?.Name, Is.EqualTo("Василий"));
+        Assert.That(addedPerson?.Name, Is.EqualTo("Василь"));
         Assert.That(addedPerson?.Hobbies.Count, Is.EqualTo(2));
     }
 
-    // тест для удаления человека
+    // тест для видалення людини
     [Test]
     public void DeletePerson_ShouldRemovePerson()
     {
-        // подготовка данных и сохранение в БД
+        // підготовка даних та збереження в БД
         var person = new Person { Name = "Марина" };
         _context?.People?.Add(person);
         _context?.SaveChanges();
 
-        // удаляем
+        // видаляємо
         _context?.People?.Remove(person);
         _context?.SaveChanges();
 
-        // проверяем
+        // перевіряємо
         var deletedPerson = _context?.People?.FirstOrDefault(p => p.Name == "Марина");
         Assert.That(deletedPerson, Is.Null);
     }
 
-    // тест для обновления увлечений человека
+    // тест для оновлення захоплень людини
     [Test]
     public void UpdatePersonHobbies_ShouldUpdateHobbies()
     {
-        // подготоваливаем данные
-        var person = new Person { Name = "Николай", Hobbies = new List<Hobby> { new Hobby { Name = "Плавание" } } };
+        // готуємо дані
+        var person = new Person { Name = "Микола", Hobbies = new List<Hobby> { new Hobby { Name = "Плавання" } } };
         _context?.People?.Add(person);
         _context?.SaveChanges();
 
-        // обновляем увлечения
+        // оновлюємо захоплення
         person.Hobbies.Clear();
-        person.Hobbies.Add(new Hobby { Name = "Готовка" });
+        person.Hobbies.Add(new Hobby { Name = "Готування" });
         _context?.SaveChanges();
 
-        // проверяем
-        var updatedPerson = _context?.People?.Include(p => p.Hobbies).FirstOrDefault(p => p.Name == "Николай");
+        // перевіряємо
+        var updatedPerson = _context?.People?.Include(p => p.Hobbies).FirstOrDefault(p => p.Name == "Микола");
         Assert.That(updatedPerson, Is.Not.Null);
         Assert.That(updatedPerson?.Hobbies.Count, Is.EqualTo(1));
-        Assert.That(updatedPerson?.Hobbies.ElementAt(0).Name, Is.EqualTo("Готовка"));
+        Assert.That(updatedPerson?.Hobbies.ElementAt(0).Name, Is.EqualTo("Готування"));
     }
 
-    // очистка базы данных после выполнения каждого теста
+    // очищення бази даних після виконання кожного тесту
     [TearDown]
     public void TearDown()
     {
