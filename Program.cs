@@ -1,12 +1,11 @@
-﻿// список команд для установки библиотек:
+// список команд для встановлення пакетів:
 /*
 dotnet add package NUnit
 dotnet add package NUnit3TestAdapter
 dotnet add package Microsoft.EntityFrameworkCore.InMemory
 dotnet add package Microsoft.NET.Test.Sdk
 */
-
-// в файле .csproj (клик по названию проекта) нужно добавить <StartupObject>Program</StartupObject> в элемент <PropertyGroup> 
+// у файлі .csproj (клік по назві проєкту) потрібно додати <StartupObject>Program</StartupObject> в елемент <PropertyGroup>
 
 using Microsoft.EntityFrameworkCore;
 
@@ -20,7 +19,6 @@ public class Person
     public bool IsActive { get; set; }
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
-
     public ICollection<Hobby> Hobbies { get; set; } = new List<Hobby>();
 }
 
@@ -28,7 +26,6 @@ public class Hobby
 {
     public int HobbyId { get; set; }
     public string? Name { get; set; }
-
     public ICollection<Person> People { get; set; } = new List<Person>();
 }
 
@@ -38,12 +35,11 @@ public class ApplicationDbContext : DbContext
     public virtual DbSet<Hobby>? Hobbies { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
-
     public ApplicationDbContext() { }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        // используем InMemory БД для тестирования
+        // використовуємо InMemory БД для тестування
         if (!optionsBuilder.IsConfigured)
         {
             optionsBuilder.UseInMemoryDatabase("TestDatabase");
@@ -53,7 +49,7 @@ public class ApplicationDbContext : DbContext
 
 public class PersonRepository
 {
-    // контекст БД теперь передаётся как параметр в конструктор
+    // контекст БД тепер передається як параметр у конструктор
     private readonly ApplicationDbContext _context;
 
     public PersonRepository(ApplicationDbContext context)
@@ -69,10 +65,10 @@ public class PersonRepository
 
         foreach (var person in people)
         {
-            Console.WriteLine($"Человек: {person.Name}");
+            Console.WriteLine($"Персона: {person.Name}");
             foreach (var hobby in person.Hobbies)
             {
-                Console.WriteLine($"  Увлечение: {hobby.Name}");
+                Console.WriteLine($"  Захоплення: {hobby.Name}");
             }
         }
     }
@@ -82,29 +78,53 @@ internal class Program
 {
     static void Main()
     {
-        // для реальной работы с SQL Server используем привычную строку подключения
-        // var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-        //    .UseSqlServer("Server=localhost;Database=PeopleHobbies;Trusted_Connection=True;TrustServerCertificate=True;")
-        //    .Options;
+        Console.OutputEncoding = System.Text.Encoding.UTF8;
+        Console.Title = "Юніт тести в EF Core";
 
-        // для тестов с InMemory
+        // для реальної роботи з SQL Server використовуємо звичний рядок підключення
+        // var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+        //     .UseSqlServer("Server=localhost;Database=PeopleHobbies;Trusted_Connection=True;TrustServerCertificate=True;")
+        //     .Options;
+
+        // для тестів з InMemory
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-             .UseInMemoryDatabase("TestDatabase")
-             .Options;
+            .UseInMemoryDatabase("TestDatabase")
+            .Options;
 
         using var context = new ApplicationDbContext(options);
         var repo = new PersonRepository(context);
 
-        // добавление данных
-        var person1 = new Person { Name = "Александр", Hobbies = new List<Hobby> { new Hobby { Name = "Футбол" }, new Hobby { Name = "Чтение" } } };
-        var person2 = new Person { Name = "Артём", Hobbies = new List<Hobby> { new Hobby { Name = "Рисование" }, new Hobby { Name = "Путешествия" } } };
+        // додавання даних
+        var person1 = new Person
+        {
+            Name = "Олександр",
+            Hobbies = new List<Hobby>
+            {
+                new Hobby { Name = "Футбол" },
+                new Hobby { Name = "Читання" }
+            }
+        };
+
+        var person2 = new Person
+        {
+            Name = "Артем",
+            Hobbies = new List<Hobby>
+            {
+                new Hobby { Name = "Малювання" },
+                new Hobby { Name = "Подорожі" }
+            }
+        };
+
         context.People?.AddRange(person1, person2);
         context.SaveChanges();
 
-        // получение и вывод всех людей с увлечениями
+        // отримання та вивід усіх людей із захопленнями
         repo.GetAllPeopleWithHobbies();
+
+        Console.WriteLine("\nНатисніть будь-яку клавішу для завершення...");
+        Console.ReadKey();
     }
 }
 
-// запуск тестов командой
+// запуск тестів командою
 // dotnet test
